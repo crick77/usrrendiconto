@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <f:metadata>
+            <f:viewAction action="#{previsioniEntrataController.initialize()}" />
+        </f:metadata>              
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Previsioni Entrate</ui:define>
+
+            <ui:define name="content">                
+                <!--  <div class="card">   -->                
+                <div class="ui-fluid p-grid">
+                    <div class="p-md-12">
+                        <p:toolbar>
+                            <p:toolbarGroup><h3 style="margin-bottom: 0px;">Previsioni Entrate</h3></p:toolbarGroup>
+                            <p:toolbarGroup align="right">
+                                <p:button value="Nuova" icon="pi pi-plus" outcome="preventrata" />
+                            </p:toolbarGroup>
+                        </p:toolbar>
+                        <p:dataTable id="previsioniEntrata" widgetVar="previsioniEntrataTable" value="#{previsioniEntrataController.prevEntrate}" var="pe" showGridlines="true" size="small" emptyMessage="Nessuna previsione di entrata in archivio." rowKey="#{pe.id}"
+                                     rowHover="true" stripedRows="true" reflow="true" resizableColumns="true" filteredValue="#{previsioniEntrataController.prevEntrateFiltrate}" globalFilterOnly="false" selection="#{previsioniEntrataController.previsioneEntrataSelezionata}" selectionMode="single">
+                            <p:ajax event="rowSelect" update="@form"/>
+                            <p:column headerText="DESCRIZIONE" filterMatchMode="contains" sortBy="#{pe.descrizione}" field="descrizione">
+                                <h:outputText value="#{pe.descrizione}" />
+                            </p:column>
+                            <p:column headerText="IMPORTO PREVISTO" width="10%" filterMatchMode="contains" sortBy="#{pe.importoPrevisto}" field="totale" style="text-align:right">                                
+                                <h:outputText value="#{pe.importoPrevisto}">
+                                    <f:convertNumber pattern="#,##0.00 €" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="ENTRATA" width="10%">
+                                <p:commandButton id="prevEntrataEntrata" update="@form:entrata" styleClass="ui-button-flat" oncomplete="PF('entrataOP').show('#{component.clientId}')" icon="pi pi-search">
+                                    <f:setPropertyActionListener value="#{pe}" target="#{previsioniEntrataController.previsioneEntrataSelezionata}"/>
+                                </p:commandButton>                                
+                            </p:column>
+                            <p:column width="8%" style="text-align: center">
+                                <p:commandButton id="modificaButton" ajax="false" icon="pi pi-pencil" styleClass="rounded-button ui-button-flat" action="#{previsioniEntrataController.modificaPrevisioneEntrata(pe)}"/><p:tooltip for="modificaButton" value="Modifica entrata" />
+                                <p:commandButton id="eliminaButton" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{previsioniEntrataController.eliminaPrevisioneEntrata(pe)}" update="@form">
+                                    <p:confirm header="Conferma" message="Sicuri di voler eliminare l'entrata con tutte le quietanze?" icon="pi pi-exclamation-triangle"/>
+                                </p:commandButton>
+                                <p:tooltip for="eliminaButton" value="Elimina entrata" />
+                            </p:column>
+                        </p:dataTable>
+                        <br/>
+                        <ui:fragment id="detailFragment" rendered="#{not empty previsioniEntrataController.previsioneEntrataSelezionata}">
+                            <p:dataTable id="ordinativoPrevisione" widgetVar="ordinativoPrevisioneTable" value="#{previsioniEntrataController.previsioneEntrataSelezionata.previsioneEntrataOrdinativoList}" var="o" showGridlines="true" size="small" emptyMessage="Nessuna ordinativo in archivio." 
+                                         rowHover="true" stripedRows="true" reflow="true" resizableColumns="true">                            
+                                <p:column headerText="ANNO COMP." width="8%" filterMatchMode="exact" sortBy="#{o.annoCompetenza}" field="annoCompetenza">                                
+                                    <h:outputText value="#{o.annoCompetenza}" />
+                                </p:column> 
+                                <p:column headerText="CODICE" width="10%" filterMatchMode="exact" sortBy="#{o.codice.codiceComposto}" field="codice.codiceComposto" >
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('ordinativoPrevisioneTable').filter()" styleClass="ui-custom-filter">
+                                            <f:selectItem itemLabel="TUTTI" itemValue="#{null}" noSelectionOption="true" />
+                                            <f:selectItems value="#{previsioniEntrataController.codici}" var="c" itemLabel="#{c.codiceComposto}" itemValue="#{c.codiceComposto}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                    <i jsf:id="infoCodice" class="pi pi-info-circle">&nbsp;</i><h:outputText value="#{o.codice.codiceComposto}" /><p:tooltip for="infoCodice" value="#{o.codice.descrizione}" position="bottom" />
+                                </p:column>
+                                <p:column headerText="BENEFICIARIO" filterMatchMode="contains" sortBy="#{o.beneficiario}" field="descrizione">
+                                    <h:outputText value="#{o.beneficiario}" />
+                                </p:column>                            
+                                <p:column headerText="IMPORTO" width="10%" filterMatchMode="contains" sortBy="#{o.importo}" field="totale" style="text-align:right">                                
+                                    <h:outputText value="#{o.importo}">
+                                        <f:convertNumber pattern="#,##0.00 €" />
+                                    </h:outputText>
+                                </p:column>
+                            </p:dataTable>
+                        </ui:fragment>
+
+                        <p:overlayPanel widgetVar="entrataOP" dismissable="false" showCloseIcon="true" dynamic="true">
+                            <p:outputPanel id="entrata" style="text-align:center;">
+                                <p:column rendered="#{not empty previsioniEntrataController.previsioneEntrataSelezionata}">
+                                    [#{previsioniEntrataController.previsioneEntrataSelezionata.idEntrata.codice.codiceComposto}] #{previsioniEntrataController.previsioneEntrataSelezionata.idEntrata.descrizione}: 
+                                    <h:outputText value="#{previsioniEntrataController.previsioneEntrataSelezionata.idEntrata.totale}">
+                                        <f:convertNumber pattern="#,##0.00 €" />
+                                    </h:outputText>
+                                </p:column>
+                            </p:outputPanel>
+                        </p:overlayPanel>
+                    </div>                                    
+                </div>
+                <!-- </div> -->
+                <p:growl id="msg" showDetail="true" escape="false"/>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+                </p:confirmDialog>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

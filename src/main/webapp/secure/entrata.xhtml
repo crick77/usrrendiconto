@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <f:metadata>
+            <f:viewParam name="ide" value="#{entrataController.idEntrata}" />
+            <f:viewAction action="#{entrataController.initialize()}" />
+        </f:metadata>                
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Entrate</ui:define>
+
+            <ui:define name="content">                
+                <div class="card">
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="annoCompetenza" class="col-fixed">Anno competenza:</label>
+                        </div>
+                        <div class="col-1">
+                            <p:inputNumber id="annoCompetenza" value="#{entrataController.entrata.annoCompetenza}" minValue="2017" required="true" requiredMessage="Anno competenza obbligatorio" thousandSeparator="" size="6" />
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="codice" class="col-fixed">Codice:</label>
+                        </div>
+                        <div class="col-2">
+                            <p:selectOneMenu id="codice" value="#{entrataController.entrata.codice}" required="true" requiredMessage="Codice obbligatorio" hideNoSelectionOption="#{not empty entrataController.entrata.codice}"
+                                             panelStyle="width:400px" filter="true" filterMatchMode="startsWith" var="codice" converter="codiciConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                <f:selectItems value="#{entrataController.codici}" var="c" itemValue="#{c}" itemLabel="#{c.codiceComposto}" />
+
+                                <p:column style="width: 12%">
+                                    <h:outputText value="#{codice.codiceComposto}" />
+                                </p:column>
+
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Descrizione"/>
+                                    </f:facet>
+                                    <h:outputText value="#{codice.descrizione}"/>
+                                </p:column>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="descrizione" class="col-fixed">Descrizione:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:inputText id="descrizione" value="#{entrataController.entrata.descrizione}" maxlength="45" size="48" required="true" requiredMessage="Descrizione obbligatoria" />
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="disponibilital8r" class="col-fixed">Disponibilit&agrave; L.8Reg:</label>
+                        </div>
+                        <div class="col-1">
+                            <p:toggleSwitch id="disponibilital8r" value="#{entrataController.l8r}" onIcon="pi pi-times" offIcon="pi pi-check" />
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <p:commandButton value="Salva" ajax="false" action="#{entrataController.salva()}" />                                
+                        </div>
+                        <div class="col-2">
+                            <p:commandButton value="Annulla" ajax="false" immediate="true" action="#{entrataController.annulla()}" />                                
+                        </div>
+                    </div>
+
+                </div>
+                <p:growl id="msg" showDetail="true" escape="false"/>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

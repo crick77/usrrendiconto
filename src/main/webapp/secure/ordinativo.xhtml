@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <f:metadata>
+            <f:viewParam name="ido" value="#{ordinativoController.id}" />
+            <f:viewAction action="#{ordinativoController.initialize()}" />
+        </f:metadata>                
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Entrate</ui:define>
+
+            <ui:define name="content">                
+                <div class="card">
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="entrata" class="col-fixed">Entrata:</label>
+                        </div>
+                        <div class="col-2">
+                            <p:selectOneMenu id="entrata" value="#{ordinativoController.ordinativo.idEntrata}" required="true" requiredMessage="Entrata obbligatoria" hideNoSelectionOption="#{not empty ordinativoController.ordinativo.idEntrata}"
+                                             panelStyle="width:500px" filter="true" filterMatchMode="startsWith" var="entrata" converter="entrataConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                <f:selectItems value="#{ordinativoController.entrate}" var="e" itemValue="#{e}" itemLabel="#{e.descrizione}" />
+
+                                <p:column>
+                                    <h:outputText value="#{entrata.annoCompetenza}: #{entrata.descrizione}" />
+                                </p:column>
+
+                                <p:column style="width: 20% !important">
+                                    <f:facet name="header">
+                                        <h:outputText value="Totale"/>
+                                    </f:facet>
+                                    <h:outputText value="#{entrata.totale}">
+                                        <f:convertNumber pattern="€ #,##0.00" />
+                                    </h:outputText>
+                                </p:column>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="annoCompetenza" class="col-fixed">Anno competenza:</label>
+                        </div>
+                        <div class="col-1">
+                            <p:inputNumber id="annoCompetenza" value="#{ordinativoController.ordinativo.annoCompetenza}" minValue="2017" required="true" requiredMessage="Anno competenza obbligatorio" thousandSeparator="" size="6" />
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="tipoDocumento" class="col-fixed">Tipo Documento:</label>
+                        </div>
+                        <div class="col-2">
+                            <p:selectOneMenu id="tipoDocumento" value="#{ordinativoController.ordinativo.tipoDocumento}" required="true" requiredMessage="Tipo documento obbligatorio" hideNoSelectionOption="#{not empty ordinativoController.ordinativo.tipoDocumento}"
+                                             panelStyle="width:400px" filter="true" filterMatchMode="startsWith" var="tipodoc" converter="tipoDocumentoConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                <f:selectItems value="#{ordinativoController.tipiDocumento}" var="td" itemValue="#{td}" itemLabel="#{td.descrizione}" />
+
+                                <p:column>
+                                    <h:outputText value="#{tipodoc.descrizione}" />
+                                </p:column>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                   
+                     <div class="field grid">
+                        <div class="col-2">
+                            <label for="numeroPagamento" class="col-fixed">Numero Pagamento:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:inputNumber id="numeroPagamento" value="#{ordinativoController.ordinativo.numeroPagamento}" decimalSeparator="" decimalPlaces="0" required="true" requiredMessage="Numero pagamento obbligatorio" />
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="dataPagamento" class="col-fixed">Data Pagamento:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:datePicker id="dataPagamento" value="#{ordinativoController.ordinativo.dataPagamento}" pattern="dd-MM-yyyy" required="true" requiredMessage="Data pagamento obbligatorio" />
+                        </div>
+                    </div>
+                    
+                                       
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="beneficiario" class="col-fixed">Beneficiario:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:autoComplete id="beneficiario" value="#{ordinativoController.ordinativo.beneficiario}" maxlength="64" size="48" required="true" requiredMessage="Beneficiario obbligatorio" completeMethod="#{ordinativoController.suggerisciBeneficiario}" queryDelay="333" />
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="importo" class="col-fixed">Importo:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:inputNumber id="importo" value="#{ordinativoController.ordinativo.importo}" decimalSeparator="," decimalSeparatorAlternative="." decimalPlaces="2" minValue="0" required="true" requiredMessage="Importo obbligatorio" />
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="codice" class="col-fixed">Codice:</label>
+                        </div>
+                        <div class="col-2">
+                            <p:selectOneMenu id="codice" value="#{ordinativoController.ordinativo.codice}" required="true" requiredMessage="Codice obbligatorio" hideNoSelectionOption="#{not empty ordinativoController.ordinativo.codice}"
+                                             panelStyle="width:400px" filter="true" filterMatchMode="startsWith" var="codice" converter="codiciConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                <f:selectItems value="#{ordinativoController.codici}" var="c" itemValue="#{c}" itemLabel="#{c.codiceComposto}" />
+
+                                <p:column style="width: 12%">
+                                    <h:outputText value="#{codice.codiceComposto}" />
+                                </p:column>
+
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Descrizione"/>
+                                    </f:facet>
+                                    <h:outputText value="#{codice.descrizione}"/>
+                                </p:column>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="tipoRts" class="col-fixed">Tipo RTS:</label>
+                        </div>
+                        <div class="col-2">
+                            <p:selectOneMenu id="tipoRts" value="#{ordinativoController.ordinativo.tipoRts}" panelStyle="width:400px" required="true" requiredMessage="Tipo RTS obbligatorio" hideNoSelectionOption="#{not empty ordinativoController.ordinativo.tipoRts}"
+                                             filter="true" filterMatchMode="startsWith" var="tiports" converter="tipoRtsConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                <f:selectItems value="#{ordinativoController.tipiRts}" var="trts" itemValue="#{trts}" itemLabel="#{trts.descrizione}" />
+
+                                <p:column>
+                                    <h:outputText value="#{tiports.descrizione}" />
+                                </p:column>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="descrizione" class="col-fixed">Descrizione RTS:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:inputText id="descrizione" value="#{ordinativoController.ordinativo.descrizioneRts}" maxlength="64" size="48" />
+                        </div>
+                    </div>
+
+                    <div class="field grid">
+                        <div class="col-2">
+                            <label for="note" class="col-fixed">Note:</label>
+                        </div>
+                        <div class="col-3">
+                            <p:inputText id="note" value="#{ordinativoController.ordinativo.note}" maxlength="255" size="48" />
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <p:commandButton value="Salva" ajax="false" action="#{ordinativoController.salva()}" />                                
+                        </div>
+                        <div class="col-2">
+                            <p:commandButton value="Annulla" ajax="false" immediate="true" action="#{ordinativoController.annulla()}" />                                
+                        </div>
+                    </div>
+
+                </div>
+                <p:growl id="msg" showDetail="true" escape="false"/>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

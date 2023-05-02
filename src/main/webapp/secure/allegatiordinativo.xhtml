@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <f:metadata>
+            <f:viewParam name="ido" value="#{allegatoOrdinativoController.id}" />
+            <f:viewAction action="#{allegatoOrdinativoController.initialize()}" />
+        </f:metadata>              
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Allegati ordinativo</ui:define>
+
+            <ui:define name="content">                
+                <!--  <div class="card">   -->                
+                <div class="ui-fluid p-grid">
+                    <div class="p-md-12">
+                        <p:toolbar>
+                            <p:toolbarGroup><h3 style="margin-bottom: 0px;">Allegati ordinativo</h3></p:toolbarGroup>
+                            <p:toolbarGroup align="right">
+                                <p:commandButton value="Torna agli ordinativi" ajax="false" action="ordinativi?faces-redirect=true" />
+                            </p:toolbarGroup>
+                        </p:toolbar>
+                        <p:dataTable id="ordinativiTable" widgetVar="ordinativiTable" value="#{allegatoOrdinativoController.allegati}" var="a" showGridlines="true" size="small" emptyMessage="Nessun allegato in archivio." 
+                                     rowHover="true" stripedRows="true" reflow="true" resizableColumns="true">                            
+                            
+                            <p:column headerText="FILE">
+                                <h:outputText value="#{a.nomefile}" />
+                            </p:column>                            
+                            <p:column headerText="DESCRIZIONE">
+                                <h:outputText value="#{a.descrizione}" />
+                            </p:column>                            
+                            
+                            <p:column width="8%" style="text-align: center">                                                                                               
+                                <p:commandButton id="visualizzaButton" icon="pi pi-desktop" styleClass="rounded-button ui-button-flat" update="@form:documentViewer" action="#{allegatoOrdinativoController.mostraAllegato}">
+                                    <f:setPropertyActionListener target="#{allegatoOrdinativoController.documentId}" value="#{a.id}" />
+                                </p:commandButton>
+                                <p:tooltip for="downloadButton" value="Scarica allegato" />  
+                                <p:commandButton id="downloadButton" icon="pi pi-download" styleClass="rounded-button ui-button-flat" action="#{allegatoOrdinativoController.download(a)}" ajax="false" />
+                                <p:tooltip for="visualizzaButton" value="Mostra allegato" />        
+                                <p:commandButton id="eliminaButton" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{allegatoOrdinativoController.eliminaAllegato(a)}" update="@form">
+                                    <p:confirm header="Conferma" message="Sicuri di voler eliminare l'allegato?" icon="pi pi-exclamation-triangle"/>
+                                </p:commandButton>
+                                <p:tooltip for="eliminaButton" value="Elimina allegato" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>      
+                </div>
+                <div class="grid">
+                    <div class="col-1">&nbsp;</div>
+                </div>
+                <div class="grid">
+                    <div class="col-1">
+                        <p:commandButton value="Nuovo" action="#{allegatoOrdinativoController.nuovoAllegato()}" update="@form" rendered="#{not allegatoOrdinativoController.modalitaAggiunta}" />
+                    </div>
+                </div>
+                
+                <ui:fragment rendered="#{allegatoOrdinativoController.modalitaAggiunta}">                    
+                    <div class="field grid">
+                        <div class="col-1">
+                            <label for="entrata" class="col-fixed">File:</label>
+                        </div>
+                        <div class="col-4">
+                            <p:fileUpload value="#{allegatoOrdinativoController.file}" mode="simple" skinSimple="true" label="Seleziona" sizeLimit="16777216" />
+                        </div>
+                    </div>
+                    
+                    <div class="field grid">    
+                        <div class="col-1">
+                            <label for="entrata" class="col-fixed">Descrizione:</label>
+                        </div>
+                        <div class="col-11">   
+                            <p:inputText id="descrizione" value="#{allegatoOrdinativoController.allegato.descrizione}" maxlength="32" />
+                        </div>                                               
+                    </div>
+                    
+                    <div class="field grid">
+                        <div class="col-2">
+                            <p:commandButton value="Salva" action="#{allegatoOrdinativoController.salva()}" ajax="false" />                                
+                        </div>
+                        <div class="col-2">
+                            <p:commandButton value="Annulla" ajax="false" immediate="true" action="#{allegatoOrdinativoController.annulla()}" />                                
+                        </div>
+                    </div>
+                </ui:fragment>
+                <!-- </div> -->
+                <p:growl id="msg" showDetail="true" escape="false"/>
+                                
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+                </p:confirmDialog>
+                
+                <p:dialog header="Documento" widgetVar="documentDialog" minHeight="40" height="80vh" width="80%" showEffect="fade" modal="true" dynamic="true" >
+                    <pe:documentViewer id="documentViewer" locale="it" value="#{mediaController.stream}" zoom="page-width" height="98%" rendered="#{not empty allegatoOrdinativoController.documentId}">
+                        <f:param name="id" value="#{allegatoOrdinativoController.documentId}" />
+                    </pe:documentViewer>
+                </p:dialog>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <f:metadata>
+            <f:viewAction action="#{ordinativiIncompletiController.initialize()}" />
+        </f:metadata>              
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Ordinativi Incompleti</ui:define>
+
+            <ui:define name="content">                
+                <!--  <div class="card">   -->                
+                <div class="ui-fluid p-grid">
+                    <div class="p-md-12">
+                        <p:toolbar>
+                            <p:toolbarGroup><h3 style="margin-bottom: 0px;">Ordinativi Incompleti</h3></p:toolbarGroup>                            
+                        </p:toolbar>
+                        <p:dataTable id="ordinativiTable" widgetVar="ordinativiTable" value="#{ordinativiIncompletiController.ordinativiIncompleti}" var="o" showGridlines="true" size="small" emptyMessage="Nessun ordinativo in archivio." 
+                                     rowHover="true" stripedRows="true" reflow="true" resizableColumns="true" filteredValue="#{ordinativiIncompletiController.ordinativiFiltrate}" globalFilterOnly="false">
+                            <f:facet name="header">
+                                <div class="flex align-items-center justify-content-between">
+                                    <span/>
+                                    <div>
+                                        <p:inputText id="globalFilter" onkeyup="PF('ordinativiTable').filter()" style="width:15rem"
+                                                     placeholder="Ricerca libera" />                                        
+                                    </div>
+                                </div>
+
+                            </f:facet>
+                            <p:column headerText="ANNO COMP." width="8%" filterMatchMode="exact" sortBy="#{o.annoCompetenza}" field="annoCompetenza" filterFunction="#{ordinativiIncompletiController.anniFilterFuction}">
+                                <f:facet name="filter">
+                                    <p:selectCheckboxMenu onchange="PF('ordinativiTable').filter()" label="TUTTI" styleClass="ui-custom-filter" panelStyle="width: 15rem" 
+                                                          scrollHeight="250" filter="true" filterMatchMode="exact" updateLabel="true" value="#{ordinativiIncompletiController.selectedAnni}" >
+                                        <f:selectItems value="#{ordinativiIncompletiController.anni}" var="a" itemValue="#{a}" itemLabel="#{a}" />
+                                    </p:selectCheckboxMenu>
+                                </f:facet>
+                                <h:outputText value="#{o.annoCompetenza}" />
+                            </p:column> 
+                            <p:column headerText="CODICE" width="10%" filterMatchMode="exact" sortBy="#{o.codice.codiceComposto}" field="codice.codiceComposto" >
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('ordinativiTable').filter()" styleClass="ui-custom-filter">
+                                        <f:selectItem itemLabel="TUTTI" itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItems value="#{ordinativiIncompletiController.codici}" var="c" itemLabel="#{c.codiceComposto}" itemValue="#{c.codiceComposto}" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <i jsf:id="infoCodice" class="pi pi-info-circle">&nbsp;</i><h:outputText value="#{o.codice.codiceComposto}" /><p:tooltip for="infoCodice" value="#{o.codice.descrizione}" position="bottom" />
+                            </p:column>
+                            <p:column headerText="BENEFICIARIO" filterMatchMode="contains" sortBy="#{o.beneficiario}" field="descrizione">
+                                <h:outputText value="#{o.beneficiario}" />
+                            </p:column>                            
+                            <p:column headerText="IMPORTO" width="10%" filterMatchMode="contains" sortBy="#{o.importo}" field="totale" style="text-align:right">                                
+                                <h:outputText value="#{o.importo}">
+                                    <f:convertNumber pattern="#,##0.00 €" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column width="8%" style="text-align: center">                                
+                                <p:commandButton id="ordinativoEntrata" update="@form:entrataOrdinativo" styleClass="ui-button-flat" oncomplete="PF('entrataOP').show('#{component.clientId}')" icon="pi pi-search">
+                                    <f:setPropertyActionListener value="#{o}" target="#{ordinativiIncompletiController.ordinativoSelezionato}"/>
+                                </p:commandButton>
+                                <p:tooltip for="ordinativoEntrata" value="Entrata di riferimento" />        
+                                <p:commandButton id="eliminaButton" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{ordinativiIncompletiController.eliminaOrdinativo(o)}" update="@form">
+                                    <p:confirm header="Conferma" message="Sicuri di voler eliminare l'ordinativo?" icon="pi pi-exclamation-triangle"/>
+                                </p:commandButton>
+                                <p:tooltip for="eliminaButton" value="Elimina entrata" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>                                    
+                </div>
+                <!-- </div> -->
+                <p:growl id="msg" showDetail="true" escape="false"/>
+                
+                <p:overlayPanel widgetVar="entrataOP" dismissable="false" showCloseIcon="true" dynamic="true">
+                    <p:outputPanel id="entrataOrdinativo" style="text-align:center;">
+                        <p:column rendered="#{not empty ordinativiIncompletiController.ordinativoSelezionato}">
+                            [#{ordinativiIncompletiController.ordinativoSelezionato.idEntrata.codice.codiceComposto}] #{ordinativiIncompletiController.ordinativoSelezionato.idEntrata.descrizione}: 
+                                <h:outputText value="#{ordinativiIncompletiController.ordinativoSelezionato.idEntrata.totale}">
+                                    <f:convertNumber pattern="#,##0.00 €" />
+                                </h:outputText>
+                        </p:column>
+                    </p:outputPanel>
+                </p:overlayPanel>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+                </p:confirmDialog>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

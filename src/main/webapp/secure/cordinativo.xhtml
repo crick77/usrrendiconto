@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"      
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <f:metadata>
+            <f:viewAction action="#{caricaOrdinativoController.initialize()}" />
+        </f:metadata>                
+    </h:head>
+    <h:body>
+        <ui:composition template="/WEB-INF/template/layout.xhtml">
+            <ui:define name="title">Carica Ordinativo</ui:define>
+
+            <ui:define name="content">                
+                <div class="card">               
+                    <ui:fragment id="loading" rendered="#{not caricaOrdinativoController.loaded}">
+                        <div class="field grid">
+                            <div class="col-2">
+                                <label for="annoCompetenza" class="col-fixed">Carica Ordinativi PDF</label>
+                            </div>
+                        </div>
+
+                        <div class="field grid">                        
+                            <div class="col-12">
+                                <p:fileUpload listener="#{caricaOrdinativoController.handleFileUpload}" mode="advanced" dragDropSupport="true" multiple="true" update="@form" sizeLimit="16777216" allowTypes="/(\.|\/)(pdf)$/" 
+                                              cancelLabel="Annulla" uploadLabel="Carica ed elabora" label="Seleziona" />
+                            </div>
+                        </div>
+                    </ui:fragment>
+
+                    <ui:fragment id="result" rendered="#{caricaOrdinativoController.loaded}">
+                        <div class="field grid">
+                            <p:dataTable id="restab" value="#{caricaOrdinativoController.ordinativi}" var="o" editMode="cell" editable="true" showGridlines="true" rowHover="true" stripedRows="true"> 
+                                <p:column headerText="Competenza">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.idEntrata.descrizione}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu id="entrata" value="#{o.idEntrata}" required="true" requiredMessage="Entrata obbligatoria" hideNoSelectionOption="#{not empty o.idEntrata}"
+                                                             panelStyle="width: 500px" filter="true" filterMatchMode="startsWith" var="entrata" converter="entrataConverter" style="width: 100%">
+                                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                                <f:selectItems value="#{caricaOrdinativoController.entrate}" var="e" itemValue="#{e}" itemLabel="#{e.descrizione}" />
+                                              
+                                                <p:column>
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Descrizione"/>
+                                                    </f:facet>
+                                                    <h:outputText value="#{entrata.descrizione}"/>
+                                                </p:column>
+                                                <p:column style="width: 18%">
+                                                    <h:outputText value="#{entrata.totale}">
+                                                        <f:convertNumber pattern="#,##0.00 €" />
+                                                    </h:outputText>
+                                                </p:column>
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>                                    
+                                </p:column>
+                                <p:column headerText="Competenza">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.annoCompetenza}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputNumber id="i_annocompetenza" value="#{o.annoCompetenza}" style="width:100%" decimalPlaces="0" thousandSeparator="" maxlength="4" minValue="2016"/>
+                                        </f:facet>
+                                    </p:cellEditor>                                    
+                                </p:column>
+                                <p:column headerText="Num. Pag.">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.numeroPagamento}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputNumber id="i_numeropagamento" value="#{o.numeroPagamento}" style="width:100%" decimalPlaces="0" thousandSeparator=""/>
+                                        </f:facet>
+                                    </p:cellEditor>                                                                        
+                                </p:column>
+                                <p:column headerText="Data Pag.">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.dataPagamento}">
+                                                <f:convertDateTime pattern="dd-MM-YYYY" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:datePicker id="i_datapagamento" value="#{o.dataPagamento}" style="width:100%" pattern="dd-MM-yyyy" />
+                                        </f:facet>
+                                    </p:cellEditor>    
+                                </p:column>
+                                <p:column headerText="Codice">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.codice.codiceComposto}" />
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu id="codice" value="#{o.codice}" required="true" requiredMessage="Codice obbligatorio" hideNoSelectionOption="#{not empty o.codice}"
+                                                             panelStyle="width: 400px" filter="true" filterMatchMode="startsWith" var="codice" converter="codiciConverter" style="width: 100%">
+                                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                                <f:selectItems value="#{caricaOrdinativoController.codici}" var="c" itemValue="#{c}" itemLabel="#{c.codiceComposto}" />
+
+                                                <p:column style="width: 12%">
+                                                    <h:outputText value="#{codice.codiceComposto}" />
+                                                </p:column>
+
+                                                <p:column>
+                                                    <f:facet name="header">
+                                                        <h:outputText value="Descrizione"/>
+                                                    </f:facet>
+                                                    <h:outputText value="#{codice.descrizione}"/>
+                                                </p:column>
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>    
+                                </p:column>
+                                <p:column headerText="Tipo Doc.">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.tipoDocumento.descrizione}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu id="tipodoc" value="#{o.tipoDocumento}" style="width: 100%" required="true" requiredMessage="Tipo documento obbligatorio" hideNoSelectionOption="#{not empty o.tipoDocumento}" converter="tipoDocumentoConverter">
+                                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                                <f:selectItems value="#{caricaOrdinativoController.tipiDocumento}" var="td" itemValue="#{td}" itemLabel="#{td.descrizione}" />
+                                            </p:selectOneMenu>
+                                        </f:facet>                                        
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Tipo RTS">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.tipoRts.descrizione}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu id="tiports" value="#{o.tipoRts}" style="width: 100%" required="true" requiredMessage="Tipo RTS obbligatorio" hideNoSelectionOption="#{not empty o.tipoRts}" converter="tipoRtsConverter">
+                                                <f:selectItem itemValue="#{null}" itemLabel="Selezionare..." noSelectionOption="true" />
+                                                <f:selectItems value="#{caricaOrdinativoController.tipiRts}" var="trts" itemValue="#{trts}" itemLabel="#{trts.descrizione}" />
+                                            </p:selectOneMenu>
+                                        </f:facet>                                        
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Beneficiario">
+                                    #{o.beneficiario}
+                                </p:column>
+                                <p:column headerText="Descr. RTS">
+                                    #{o.descrizioneRts}
+                                </p:column>                                
+                                <p:column headerText="Importo" style="text-align: right;">
+                                    <h:outputText value="#{o.importo}">
+                                        <f:convertNumber pattern="#,###.00 €" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Note">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{o.note}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText id="i_note" value="#{o.note}" style="width:100%" maxlength="255" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+
+                        <div class="field grid">
+                            <div class="col-1">
+                                <p:commandButton value="Salva" ajax="false" action="#{caricaOrdinativoController.salva()}" />                                
+                            </div>
+                            <div class="col-1">
+                                <p:commandButton value="Annulla" ajax="false" immediate="true" action="#{caricaOrdinativoController.annulla()}" />                                
+                            </div>
+                        </div>
+                    </ui:fragment>
+
+                </div>
+                <p:growl id="msg" showDetail="true" escape="false"/>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
